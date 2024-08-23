@@ -48,7 +48,7 @@ const GuildsListManager: React.FC<{ children: React.ReactNode }> = ({
                 } else if (isIHttpErrorCode(jsonData)) {
                     console.log(jsonData);
                     if (jsonData.code === ErrorCodes.UNAUTHORIZED) {
-                        location.href = '/api/auth?back=/dashboard/guilds';
+                        location.href = '/api/auth?back=/dashboard/guild';
                     }
                     setError(jsonData);
                 } else {
