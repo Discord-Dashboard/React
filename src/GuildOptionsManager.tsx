@@ -41,7 +41,9 @@ const GuildOptionsManager: React.FC<{ children: React.ReactNode }> = ({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/guild-data');
+                const response = await fetch(
+                    '/api/options/guild/787746369036222535',
+                );
                 const jsonData: GuildData | IHttpErrorCode =
                     await response.json();
                 if (isGuildData(jsonData)) {
@@ -72,7 +74,7 @@ const GuildOptionsManager: React.FC<{ children: React.ReactNode }> = ({
     }, []);
 
     const updateData = async (newData: GuildData) => {
-        await fetch('/api/guild-data', {
+        await fetch('/api/options/guild/787746369036222535', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
