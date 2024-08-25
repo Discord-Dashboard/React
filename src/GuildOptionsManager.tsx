@@ -2,31 +2,46 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { IHttpErrorCode } from 'throw-http-errors/dist/httpErrors/HttpErrorCodeInterface';
-
-interface GuildData {
-    name: string;
-    description: string;
-}
+import { type TGuildData } from '@discord-dashboard/base-theme/index';
 
 interface GuildContextType {
     loading: boolean;
-    data: GuildData | null;
+    data: TGuildData[] | null;
     error: IHttpErrorCode | null;
-    updateData: (newData: GuildData) => void;
-    editData: (field: keyof GuildData, value: string) => void;
+    updateData: (newData: TGuildData[]) => void;
+    editData: (field: keyof TGuildData, value: string) => void;
+}
+
+interface GuildOptionsManagerProps {
+    children: React.ReactNode;
+    guildId: string;
 }
 
 const GuildContext = createContext<GuildContextType | undefined>(undefined);
 
-const GuildOptionsManager: React.FC<{ children: React.ReactNode }> = ({
+const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
     children,
+    guildId,
 }) => {
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<GuildData | null>(null);
+    const [data, setData] = useState<TGuildData[] | null>(null);
     const [error, setError] = useState<IHttpErrorCode | null>(null);
 
-    function isGuildData(data: any): data is GuildData {
-        return typeof data.id === 'string' && typeof data.name === 'string';
+    // function isGuildData(data: any): data is TGuildData {
+    //     // console.log('Checking Data: ' + JSON.stringify(data));
+    //     //
+    //     // console.log('Check Result: ' + typeof data[0].id === 'string');
+    //     //
+    //     // console.log('Type of data.id: ' + typeof data[0].id);
+    //
+    //     return typeof data[0].id === 'string';
+    // }
+
+    function isGuildData(data: any): data is TGuildData[] {
+        return (
+            Array.isArray(data) &&
+            data.every((item) => typeof item.id === 'string')
+        );
     }
 
     function isIHttpErrorCode(data: any): data is IHttpErrorCode {
@@ -41,13 +56,13 @@ const GuildOptionsManager: React.FC<{ children: React.ReactNode }> = ({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(
-                    '/api/options/guild/787746369036222535',
-                );
-                const jsonData: GuildData | IHttpErrorCode =
+                const response = await fetch('/api/options/guild/' + guildId);
+                const jsonData: TGuildData[] | IHttpErrorCode =
                     await response.json();
+
                 if (isGuildData(jsonData)) {
-                    setData(jsonData);
+                    console.debug('JSON Data is valid and set!');
+                    setData(jsonData); // Now this is correct
                 } else if (isIHttpErrorCode(jsonData)) {
                     setError(jsonData);
                 } else {
@@ -73,8 +88,8 @@ const GuildOptionsManager: React.FC<{ children: React.ReactNode }> = ({
         fetchData();
     }, []);
 
-    const updateData = async (newData: GuildData) => {
-        await fetch('/api/options/guild/787746369036222535', {
+    const updateData = async (newData: TGuildData[]) => {
+        await fetch('/api/options/guild/' + guildId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -85,7 +100,7 @@ const GuildOptionsManager: React.FC<{ children: React.ReactNode }> = ({
         setData(newData);
     };
 
-    const editData = (field: keyof GuildData, value: string) => {
+    const editData = (field: keyof TGuildData, value: string) => {
         if (data) {
             setData({ ...data, [field]: value });
         }
