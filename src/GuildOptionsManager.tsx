@@ -2,40 +2,35 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { IHttpErrorCode } from 'throw-http-errors/dist/httpErrors/HttpErrorCodeInterface';
-import { type TGuildData } from '@discord-dashboard/base-theme/index';
+import {
+    type TGuildData,
+    TGuildOptionsUpdate,
+} from '@discord-dashboard/typings/dist/React';
 
 interface GuildContextType {
     loading: boolean;
     data: TGuildData[] | null;
+    guildId: string;
     error: IHttpErrorCode | null;
-    updateData: (newData: TGuildData[]) => void;
+    updateData: (newData: TGuildOptionsUpdate[]) => void;
     editData: (field: keyof TGuildData, value: string) => void;
 }
 
 interface GuildOptionsManagerProps {
     children: React.ReactNode;
-    guildId: string;
+    id: string;
 }
 
 const GuildContext = createContext<GuildContextType | undefined>(undefined);
 
 const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
     children,
-    guildId,
+    id,
 }) => {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<TGuildData[] | null>(null);
     const [error, setError] = useState<IHttpErrorCode | null>(null);
-
-    // function isGuildData(data: any): data is TGuildData {
-    //     // console.log('Checking Data: ' + JSON.stringify(data));
-    //     //
-    //     // console.log('Check Result: ' + typeof data[0].id === 'string');
-    //     //
-    //     // console.log('Type of data.id: ' + typeof data[0].id);
-    //
-    //     return typeof data[0].id === 'string';
-    // }
+    const [guildId, setGuildId] = useState(id);
 
     function isGuildData(data: any): data is TGuildData[] {
         return (
@@ -88,8 +83,10 @@ const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
         fetchData();
     }, []);
 
-    const updateData = async (newData: TGuildData[]) => {
-        await fetch('/api/options/guild/' + guildId, {
+    const updateData = async (newData: TGuildOptionsUpdate[]) => {
+        console.log('New Data:', JSON.stringify(newData));
+
+        const response = await fetch('/api/options/guild/' + guildId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,7 +94,9 @@ const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
             body: JSON.stringify(newData),
         });
 
-        setData(newData);
+        const jsonData = await response.json();
+
+        console.log('JSON Data:', JSON.stringify(jsonData));
     };
 
     const editData = (field: keyof TGuildData, value: string) => {
@@ -108,7 +107,14 @@ const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
 
     return (
         <GuildContext.Provider
-            value={{ loading, error, data, updateData, editData }}
+            value={{
+                loading,
+                error,
+                data,
+                guildId,
+                updateData,
+                editData,
+            }}
         >
             {children}
         </GuildContext.Provider>
