@@ -12,7 +12,7 @@ interface GuildContextType {
     data: TGuildData[] | null;
     guildId: string;
     error: IHttpErrorCode | null;
-    updateData: (newData: TGuildOptionsUpdate[]) => void;
+    updateData: (newData: TGuildOptionsUpdate[]) => Promise<any>;
     editData: (field: keyof TGuildData, value: string) => void;
 }
 
@@ -84,8 +84,6 @@ const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
     }, []);
 
     const updateData = async (newData: TGuildOptionsUpdate[]) => {
-        console.log('New Data:', JSON.stringify(newData));
-
         const response = await fetch('/api/options/guild/' + guildId, {
             method: 'POST',
             headers: {
@@ -94,9 +92,7 @@ const GuildOptionsManager: React.FC<GuildOptionsManagerProps> = ({
             body: JSON.stringify(newData),
         });
 
-        const jsonData = await response.json();
-
-        console.log('JSON Data:', JSON.stringify(jsonData));
+        return await response.json();
     };
 
     const editData = (field: keyof TGuildData, value: string) => {
