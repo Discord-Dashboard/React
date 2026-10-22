@@ -1,0 +1,1 @@
+> **Archived.** This repository was part of an earlier v3 attempt and has been replaced by the v3 monorepo at [Discord-Dashboard/Core](https://github.com/Discord-Dashboard/Core/tree/v3). Please open issues and pull requests there.
